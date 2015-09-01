@@ -58,21 +58,21 @@ class block_domoscio_reminder extends block_base {
         global $DB, $USER, $CFG;
 
         $kn_students = $DB->get_records_sql("SELECT *
-                                               FROM ".$CFG->prefix."knowledge_node_students
-                                         INNER JOIN ".$CFG->prefix."knowledge_nodes
-                                                 ON ".$CFG->prefix."knowledge_nodes.`knowledge_node_id` = ".$CFG->prefix."knowledge_node_students.`knowledge_node_id`
-                                              WHERE ".$CFG->prefix."knowledge_node_students.`user` = $USER->id
-                                                AND (".$CFG->prefix."knowledge_nodes.`active` IS NULL
-                                                 OR ".$CFG->prefix."knowledge_nodes.`active` = '1')");
+                                               FROM {domoscio_knode_students}
+                                         INNER JOIN {domoscio_knowledge_nodes}
+                                                 ON {domoscio_knowledge_nodes}.`knodeid` = {domoscio_knode_students}.`knodeid`
+                                              WHERE {domoscio_knode_students}.`userid` = $USER->id
+                                                AND ({domoscio_knowledge_nodes}.`active` IS NULL
+                                                     OR {domoscio_knowledge_nodes}.`active` = '1')");
         $i = 0;
         $list = array();
         foreach($kn_students as $kn_student)
         {
-            $result = json_decode($this->setUrl($config, 'knowledge_node_students', $kn_student->kn_student_id)->get());
+            $result = json_decode($this->setUrl($config, 'knowledge_node_students', $kn_student->knodestudentid)->get());
 
             if(strtotime($result->next_review_at) < time() && $result->next_review_at != null && $result->active == 'true')
             {
-                $list[] = $kn_student->kn_student_id;
+                $list[] = $kn_student->knodestudentid;
             }
         }
 
@@ -82,7 +82,7 @@ class block_domoscio_reminder extends block_base {
     private $_url;
     public function setUrl($config, $feature, $var)
     {
-        $this->_url = $config->domoscio_apiurl."/companies/".$config->domoscio_id."/".$feature."/".$var."?token=".$config->domoscio_apikey;
+        $this->_url = $config->domoscio_apiurl."/instances/".$config->domoscio_id."/".$feature."/".$var."?token=".$config->domoscio_apikey;
         return $this;
     }
 
